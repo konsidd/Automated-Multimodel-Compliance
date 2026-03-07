@@ -1,0 +1,42 @@
+# ─────────────────────────────────────────────
+# Compliance Rules
+# Each rule has an id, description, and keywords
+# that trigger evaluation.
+# ─────────────────────────────────────────────
+
+rules:
+  - id: "GDPR-001"
+    category: "Data Privacy"
+    description: "Personal data must not be collected without explicit consent."
+    keywords: ["personal data", "consent", "GDPR", "user data", "privacy"]
+    severity: "critical"
+
+  - id: "GDPR-002"
+    category: "Data Privacy"
+    description: "Users must be informed about data retention periods."
+    keywords: ["retention", "data storage", "how long", "delete data"]
+    severity: "high"
+
+  - id: "HIPAA-001"
+    category: "Healthcare"
+    description: "Protected Health Information (PHI) must be encrypted at rest and in transit."
+    keywords: ["PHI", "health information", "patient data", "medical records"]
+    severity: "critical"
+
+  - id: "SOC2-001"
+    category: "Security"
+    description: "Access controls must be in place for sensitive systems."
+    keywords: ["access control", "authentication", "authorization", "MFA", "2FA"]
+    severity: "high"
+
+  - id: "SOC2-002"
+    category: "Security"
+    description: "Audit logs must be maintained for all data access events."
+    keywords: ["audit log", "logging", "monitoring", "access event"]
+    severity: "medium"
+
+  - id: "PCI-001"
+    category: "Payment"
+    description: "Cardholder data must never be stored in plain text."
+    keywords: ["credit card", "cardholder", "PAN", "CVV", "payment data"]
+    severity: "critical"

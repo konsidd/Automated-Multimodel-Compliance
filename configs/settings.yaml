@@ -1,0 +1,53 @@
+# ─────────────────────────────────────────────
+# Automated Compliance Orchestrator – Settings
+# ─────────────────────────────────────────────
+
+app:
+  name: "Compliance Orchestrator"
+  version: "0.1.0"
+  debug: false
+
+# ── LLM (local via Ollama) ──────────────────
+llm:
+  provider: "openai"           # ollama | openai
+  model: "gpt-4o"             
+  temperature: 0.0
+  max_tokens: 2048
+
+# ── Embeddings (local sentence-transformers) ─
+embeddings:
+  model: "all-MiniLM-L6-v2"   # runs fully locally
+  device: "cpu"                # cpu | cuda
+
+# ── Vector Store (FAISS) ────────────────────
+vector_store:
+  index_path: "data/vector_index/faiss.index"
+  metadata_path: "data/vector_index/metadata.json"
+  top_k: 5
+
+# ── Ingestion ────────────────────────────────
+ingestion:
+  whisper_model: "base"        # tiny | base | small | medium | large
+  temp_video_dir: "data/raw_videos"
+  transcript_dir: "data/transcripts"
+  ocr_lang: "eng"              # tesseract language code
+  chunk_size: 512
+  chunk_overlap: 64
+
+# ── Compliance ───────────────────────────────
+compliance:
+  policies_dir: "data/policies"
+  rules_file: "configs/rules.yaml"
+  score_threshold: 0.75        # minimum compliance score
+
+# ── API ──────────────────────────────────────
+api:
+  host: "0.0.0.0"
+  port: 8000
+  reload: true
+
+# ── Telemetry ────────────────────────────────
+telemetry:
+  log_level: "INFO"
+  langsmith_project: "compliance-orchestrator"
+  enable_tracing: true         # set LANGCHAIN_API_KEY in .env
