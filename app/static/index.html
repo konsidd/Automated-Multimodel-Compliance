@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Multimodal Compliance Orchestrator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="file"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: ui-monospace, monospace;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .success {
+            color: #28a745;
+        }
+        .loading {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <h1>Automated Multimodal Compliance Orchestrator</h1>
+    <p style="text-align:center; color:#666; margin-top:-10px; margin-bottom:20px;">
+        Open this app at <strong>http://127.0.0.1:8000</strong>
+    </p>
+
+    <div class="container">
+        <h2>Health Check</h2>
+        <button onclick="checkHealth()">Check Server Health</button>
+        <div id="healthResult" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h2>Audit Text</h2>
+        <form id="textAuditForm">
+            <label for="textInput">Text to Audit:</label>
+            <textarea id="textInput" rows="4" placeholder="Enter text for compliance audit..."></textarea>
+            <button type="submit">Audit Text</button>
+        </form>
+        <div id="textAuditResult" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h2>Audit Video</h2>
+        <form id="videoAuditForm">
+            <label for="videoSource">Video Source (YouTube URL or local path):</label>
+            <input type="text" id="videoSource" placeholder="https://www.youtube.com/watch?v=... or /path/to/video.mp4">
+            <button type="submit">Audit Video</button>
+        </form>
+        <div id="videoAuditResult" class="result"></div>
+    </div>
+
+    <div class="container">
+        <h2>Index Policy Document</h2>
+        <form id="indexForm">
+            <label for="policyFile">Policy Document Path:</label>
+            <input type="text" id="policyFile" placeholder="/path/to/policy.txt">
+            <button type="submit">Index Document</button>
+        </form>
+        <div id="indexResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.className = `result ${type}`;
+        }
+
+        async function checkHealth() {
+            try {
+                showResult('healthResult', 'Checking...', 'loading');
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                showResult('healthResult', `Status: ${data.status}, Version: ${data.version}`, 'success');
+            } catch (error) {
+                showResult('healthResult', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        document.getElementById('textAuditForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = document.getElementById('textInput').value;
+            if (!text.trim()) {
+                showResult('textAuditResult', 'Please enter text to audit.', 'error');
+                return;
+            }
+
+            try {
+                showResult('textAuditResult', 'Auditing text...', 'loading');
+                const response = await fetch(`${API_BASE}/audit/text`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text }),
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showResult('textAuditResult', `Source: ${data.source}\nCompliance Score: ${data.compliance_score}\nIs Compliant: ${data.is_compliant ? 'Yes' : 'No'}\nSummary: ${data.summary}\nResults:\n${JSON.stringify(data.results, null, 2)}`,'success');
+                } else {
+                    showResult('textAuditResult', `Error: ${data.detail || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showResult('textAuditResult', `Error: ${error.message}`, 'error');
+            }
+        });
+
+        document.getElementById('videoAuditForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const source = document.getElementById('videoSource').value;
+            if (!source.trim()) {
+                showResult('videoAuditResult', 'Please enter a video source.', 'error');
+                return;
+            }
+
+            try {
+                showResult('videoAuditResult', 'Auditing video...', 'loading');
+                const response = await fetch(`${API_BASE}/audit/video`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ source: source }),
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showResult('videoAuditResult', `Source: ${data.source}\nCompliance Score: ${data.compliance_score}\nIs Compliant: ${data.is_compliant ? 'Yes' : 'No'}\nSummary: ${data.summary}\nResults:\n${JSON.stringify(data.results, null, 2)}`,'success');
+                } else {
+                    showResult('videoAuditResult', `Error: ${data.detail || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showResult('videoAuditResult', `Error: ${error.message}`, 'error');
+            }
+        });
+
+        document.getElementById('indexForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const filePath = document.getElementById('policyFile').value;
+            if (!filePath.trim()) {
+                showResult('indexResult', 'Please enter a file path.', 'error');
+                return;
+            }
+
+            try {
+                showResult('indexResult', 'Indexing document...', 'loading');
+                const response = await fetch(`${API_BASE}/index/document`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ file_path: filePath }),
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showResult('indexResult', `
+                        <strong>Indexed Chunks:</strong> ${data.indexed_chunks}<br>
+                        <strong>Total Vectors:</strong> ${data.total_vectors}
+                    `, 'success');
+                } else {
+                    showResult('indexResult', `Error: ${data.detail || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showResult('indexResult', `Error: ${error.message}`, 'error');
+            }
+        });
+
+        // Check health on page load
+        checkHealth();
+    </script>
+</body>
+</html>

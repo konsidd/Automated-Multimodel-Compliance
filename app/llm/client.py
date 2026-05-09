@@ -66,6 +66,12 @@ def invoke_llm(system_prompt: str, user_prompt: str) -> str:
         SystemMessage(content=system_prompt),
         HumanMessage(content=user_prompt),
     ]
-    response = llm.invoke(messages)
-    content = response.content
-    return content.strip() if isinstance(content, str) else str(content).strip()
+    try:
+        response = llm.invoke(messages)
+        content = response.content
+        if not isinstance(content, str):
+            content = str(content)
+        return content
+    except Exception as e:
+        logger.error("llm_invoke_failed", error=str(e))
+        return "Error: LLM invocation failed".strip() if isinstance(content, str) else str(content).strip()

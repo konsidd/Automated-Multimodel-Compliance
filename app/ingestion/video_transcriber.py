@@ -7,7 +7,9 @@ OpenAI Whisper (runs entirely locally).
 
 from __future__ import annotations
 
+import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -30,18 +32,43 @@ def download_video(url: str, output_dir: Optional[str] = None) -> Path:
 
     # Download best audio-only format for faster transcription
     output_template = str(out_dir / "%(id)s.%(ext)s")
-    cmd = [
-        "yt-dlp",
-        "--format", "bestaudio/best",
-        "--output", output_template,
-        "--no-playlist",
-        url,
-    ]
-    logger.info("downloading_video", url=url)
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    command = shutil.which("yt-dlp")
+    if command:
+        cmd = [
+            command,
+            "--format",
+            "bestaudio/best",
+            "--output",
+            output_template,
+            "--no-playlist",
+            url,
+        ]
+    else:
+        cmd = [
+            sys.executable,
+            "-m",
+            "yt_dlp",
+            "--format",
+            "bestaudio/best",
+            "--output",
+            output_template,
+            "--no-playlist",
+            url,
+        ]
+
+    logger.info("downloading_video", url=url, command=cmd[0])
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True)
+    except FileNotFoundError as exc:
+        raise RuntimeError(
+            "yt-dlp is not installed or not available on PATH. "
+            "Install it via 'pip install yt-dlp' and restart the server."
+        ) from exc
 
     if result.returncode != 0:
-        raise RuntimeError(f"yt-dlp failed:\n{result.stderr}")
+        raise RuntimeError(
+            f"yt-dlp failed with exit code {result.returncode}:\n{result.stdout}\n{result.stderr}"
+        )
 
     # Find the downloaded file
     files = sorted(out_dir.glob("*.webm")) + sorted(out_dir.glob("*.m4a")) + sorted(out_dir.glob("*.mp4"))

@@ -80,11 +80,15 @@ def audit_content(content: str, source: str = "unknown") -> AuditReport:
 
     # 6. Generate executive summary
     import json
-    summary_raw = invoke_llm(
-        system_prompt=SUMMARY_SYSTEM,
-        user_prompt=SUMMARY_USER.format(audit_results=json.dumps([r.model_dump() for r in rule_results], indent=2)),
-    )
-    report.summary = summary_raw
+    try:
+        summary_raw = invoke_llm(
+            system_prompt=SUMMARY_SYSTEM,
+            user_prompt=SUMMARY_USER.format(audit_results=json.dumps([r.model_dump() for r in rule_results], indent=2)),
+        )
+        report.summary = summary_raw
+    except Exception as e:
+        logger.error("summary_generation_failed", error=str(e))
+        report.summary = "Summary generation failed due to LLM error."
 
     logger.info(
         "audit_complete",

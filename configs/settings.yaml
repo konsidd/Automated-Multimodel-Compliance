@@ -9,8 +9,8 @@ app:
 
 # ── LLM (local via Ollama) ──────────────────
 llm:
-  provider: "openai"           # ollama | openai
-  model: "gpt-4o"             
+  provider: "ollama"           # ollama | openai
+  model: "llama3"             
   temperature: 0.0
   max_tokens: 2048
 

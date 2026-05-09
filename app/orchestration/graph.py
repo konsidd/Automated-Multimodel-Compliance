@@ -97,5 +97,5 @@ def run_pipeline(
     from typing import cast
 
     final_state = cast(PipelineState, graph.invoke(initial_state))
-    # the caller still wants a plain dict, so dump the model before returning
-    return final_state.model_dump()
+    # the caller wants a plain dict
+    return final_state

@@ -12,10 +12,20 @@ Endpoints:
 from __future__ import annotations
 
 import json
+import warnings
 from pathlib import Path
 from typing import Optional
 
+# Suppress the LangGraph/LangChain deprecation warning about allowed_objects.
+warnings.filterwarnings(
+    "ignore",
+    message=r".*allowed_objects.*",
+)
+
 from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from app.compliance.schemas import AuditReport
@@ -34,6 +44,23 @@ app = FastAPI(
     version=cfg.version,
     description="Local multimodal compliance auditing via LangGraph + Whisper + FAISS + Ollama",
 )
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
+# Mount static files
+app.mount("/static", StaticFiles(directory=Path(__file__).parent.parent / "static"), name="static")
+
+# Serve the frontend
+@app.get("/")
+def read_root():
+    return FileResponse(Path(__file__).parent.parent / "static" / "index.html")
 
 
 # ── Request / Response models ──────────────────────────────────────────────────
@@ -81,7 +108,7 @@ def audit_video(req: VideoAuditRequest):
     if not report_data:
         raise HTTPException(status_code=500, detail="No audit report generated")
 
-    report = AuditReport(**report_data) if isinstance(report_data, dict) else report_data
+    report = AuditReport.model_validate(report_data)
     return AuditResponse(
         source=report.source,
         compliance_score=report.compliance_score,
@@ -95,23 +122,27 @@ def audit_video(req: VideoAuditRequest):
 def audit_text(req: TextAuditRequest):
     """Audit a plain-text snippet for compliance."""
     logger.info("api_audit_text", source=req.source_label)
-    state = run_pipeline(source=req.source_label, input_type="text", raw_text=req.text)
+    try:
+        state = run_pipeline(source=req.source_label, input_type="text", raw_text=req.text)
 
-    if state.get("error"):
-        raise HTTPException(status_code=500, detail=state["error"])
+        if state.get("error"):
+            raise HTTPException(status_code=500, detail=state["error"])
 
-    report_data = state.get("audit_report")
-    if not report_data:
-        raise HTTPException(status_code=500, detail="No audit report generated")
+        report_data = state.get("audit_report")
+        if not report_data:
+            raise HTTPException(status_code=500, detail="No audit report generated")
 
-    report = AuditReport(**report_data) if isinstance(report_data, dict) else report_data
-    return AuditResponse(
-        source=report.source,
-        compliance_score=report.compliance_score,
-        is_compliant=report.is_compliant,
-        summary=report.summary,
-        results=[r.model_dump() for r in report.results],
-    )
+        report = AuditReport(**report_data) if isinstance(report_data, dict) else report_data
+        return AuditResponse(
+            source=report.source,
+            compliance_score=report.compliance_score,
+            is_compliant=report.is_compliant,
+            summary=report.summary,
+            results=[r.model_dump() for r in report.results],
+        )
+    except Exception as e:
+        logger.error("audit_text_error", error=str(e))
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 
 @app.post("/index/document")

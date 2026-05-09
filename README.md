@@ -78,10 +78,16 @@ python scripts/run_pipeline.py --type text --text "..." --output report.json
 ### 5. Start the API server
 
 ```bash
-uvicorn app.api.server:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app.api.server:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-API docs available at `http://localhost:8000/docs`
+Or on Windows, run:
+
+```powershell
+run_server.bat
+```
+
+API docs available at `http://127.0.0.1:8000/docs`
 
 ---
 

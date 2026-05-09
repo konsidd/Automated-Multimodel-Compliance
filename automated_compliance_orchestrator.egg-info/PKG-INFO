@@ -1,0 +1,34 @@
+Metadata-Version: 2.4
+Name: automated-compliance-orchestrator
+Version: 0.1.0
+Summary: Azure Multi-Modal Compliance Orchestration Engine using LangGraph (local tools)
+Requires-Python: >=3.10
+Requires-Dist: langgraph>=0.2.0
+Requires-Dist: langchain>=0.2.0
+Requires-Dist: langchain-community>=0.2.0
+Requires-Dist: langchain-openai>=0.1.0
+Requires-Dist: ollama>=0.2.0
+Requires-Dist: openai>=1.30.0
+Requires-Dist: faiss-cpu>=1.8.0
+Requires-Dist: sentence-transformers>=3.0.0
+Requires-Dist: openai-whisper>=20231117
+Requires-Dist: pytesseract>=0.3.10
+Requires-Dist: Pillow>=10.0.0
+Requires-Dist: opencv-python-headless>=4.9.0
+Requires-Dist: yt-dlp>=2024.4.9
+Requires-Dist: fastapi>=0.111.0
+Requires-Dist: uvicorn[standard]>=0.29.0
+Requires-Dist: python-multipart>=0.0.9
+Requires-Dist: pydantic>=2.7.0
+Requires-Dist: pydantic-settings>=2.2.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: numpy>=1.26.0
+Requires-Dist: langsmith>=0.1.0
+Requires-Dist: structlog>=24.1.0
+Requires-Dist: rich>=13.7.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23; extra == "dev"
+Requires-Dist: httpx>=0.27; extra == "dev"
+Requires-Dist: ruff>=0.4; extra == "dev"
